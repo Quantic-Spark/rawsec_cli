@@ -114,8 +114,8 @@ def search(
         blackarch,
     )
     wanted_keys = list()
-    for project in projects:
-        wanted_keys += project.keys()
+    for proj in projects:
+        wanted_keys += proj.keys()
     print_output(
         projects=projects,
         output=output,

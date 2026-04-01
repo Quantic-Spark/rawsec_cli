@@ -5,9 +5,19 @@ import os
 import sys
 import webbrowser
 from typing import List
+from urllib.parse import urlparse
 
 import click
 from columnar import columnar
+
+
+def _is_safe_url(url: str) -> bool:
+    """Only allow http/https URLs to be opened in the browser."""
+    try:
+        parsed = urlparse(url)
+        return parsed.scheme in ("http", "https")
+    except Exception:
+        return False
 
 
 def print_output(projects: List, output="list", file=None, wanted_keys=None):
@@ -76,13 +86,19 @@ def csv_output(projects: list, wanted_keys: list, file=None):
         file name.
     """
     if file is not None:
-        fileobj = open(file, "w")
+        fileobj = open(file, "w", newline="")
+        try:
+            file_writer = csv.writer(fileobj, quoting=csv.QUOTE_ALL)
+            file_writer.writerow(wanted_keys)
+            for project in projects:
+                file_writer.writerow(project.values())
+        finally:
+            fileobj.close()
     else:
-        fileobj = sys.stdout
-    file_writer = csv.writer(fileobj, quoting=csv.QUOTE_ALL)
-    file_writer.writerow(wanted_keys)
-    for project in projects:
-        file_writer.writerow(project.values())
+        file_writer = csv.writer(sys.stdout, quoting=csv.QUOTE_ALL)
+        file_writer.writerow(wanted_keys)
+        for project in projects:
+            file_writer.writerow(project.values())
 
 
 def table_output(projects: list, wanted_keys: list, file=None):
@@ -128,9 +144,13 @@ def table_output(projects: list, wanted_keys: list, file=None):
                 f.write(table)
         else:
             if len(projects) == 1:
-                if "website" in projects[0]:
+                if "website" in projects[0] and _is_safe_url(
+                    projects[0]["website"]
+                ):
                     webbrowser.open_new_tab(projects[0]["website"])
-                elif "source" in projects[0]:
+                elif "source" in projects[0] and _is_safe_url(
+                    projects[0]["source"]
+                ):
                     webbrowser.open_new_tab(projects[0]["source"])
             click.echo(table)
             click.echo("Total projects found: " + str(len(projects)))
@@ -184,9 +204,13 @@ def list_output(projects: list, file=None):
                 f.write(str_output)
         else:
             if len(projects) == 1:
-                if "website" in projects[0]:
+                if "website" in projects[0] and _is_safe_url(
+                    projects[0]["website"]
+                ):
                     webbrowser.open_new_tab(projects[0]["website"])
-                elif "source" in projects[0]:
+                elif "source" in projects[0] and _is_safe_url(
+                    projects[0]["source"]
+                ):
                     webbrowser.open_new_tab(projects[0]["source"])
             click.echo(str_output)
             click.echo("Total projects found: " + str(len(projects)))

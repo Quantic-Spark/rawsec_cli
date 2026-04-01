@@ -14,10 +14,18 @@ def load_inventory_json() -> Dict:
     Dict
         rawsec dict of project
     """
-    r = requests.get("https://inventory.raw.pm/api/api.json")
-    if r.status_code != 200 or "tools" not in r.json():
+    try:
+        r = requests.get(
+            "https://inventory.raw.pm/api/api.json", timeout=10
+        )
+    except requests.RequestException:
         return {}
-    return r.json()
+    if r.status_code != 200:
+        return {}
+    data = r.json()
+    if "tools" not in data:
+        return {}
+    return data
 
 
 # Items
@@ -247,10 +255,11 @@ def get_operating_by_category(json: Dict, category: str) -> List[Dict]:
     List[Dict]
         operating_systems by category list, [] if category is not available.
     """
-    os = get_operating_json(json)
+    operating = get_operating_json(json)
     return (
-        os[category]["operating_systems"]
-        if category in os and "operating_systems" in os[category]
+        operating[category]["operating_systems"]
+        if category in operating
+        and "operating_systems" in operating[category]
         else []
     )
 

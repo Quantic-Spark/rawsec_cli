@@ -42,7 +42,7 @@ def filter_projects(
             project
             for project in projects
             if "language" in project
-            and not lang.lower() != project["language"].lower()
+            and lang.lower() == project["language"].lower()
         ]
 
     if paid:

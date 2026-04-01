@@ -144,8 +144,8 @@ def tools(
 
     if category and category not in get_tools_category(json=ctx.obj["json"]):
         click.echo("Category available:")
-        for category in get_tools_category(json=ctx.obj["json"]):
-            click.echo(f"\t{category}")
+        for cat in get_tools_category(json=ctx.obj["json"]):
+            click.echo(f"\t{cat}")
         sys.exit("Not a good category")
     if category:
         projects = get_tools_by_category(ctx.obj["json"], category)
@@ -235,8 +235,8 @@ def resources(ctx, category, paid, free, output, output_file):
         json=ctx.obj["json"],
     ):
         click.echo("Category available:")
-        for category in get_resources_category(json=ctx.obj["json"]):
-            click.echo(f"\t{category}")
+        for cat in get_resources_category(json=ctx.obj["json"]):
+            click.echo(f"\t{cat}")
         sys.exit("Not a good category")
     if category:
         projects = get_resources_by_category(ctx.obj["json"], category)
@@ -244,15 +244,6 @@ def resources(ctx, category, paid, free, output, output_file):
         projects = get_all_resources(ctx.obj["json"])
 
     projects = filter_projects(projects, paid=paid, free=free)
-    resourcesList = list()
-    for resource in projects:
-        resourceList = list()
-        for keys in wanted_keys:
-            if keys not in resource:
-                resourceList.append("")
-            else:
-                resourceList.append(resource[keys])
-        resourcesList.append(resourceList)
     print_output(
         projects=projects,
         output=output,
@@ -331,8 +322,8 @@ def ctf(ctx, category, lang, paid, free, output, output_file):
     ]
     if category and category not in get_ctf_category(json=ctx.obj["json"]):
         click.echo("Category available:")
-        for category in get_ctf_category(json=ctx.obj["json"]):
-            click.echo(f"\t{category}")
+        for cat in get_ctf_category(json=ctx.obj["json"]):
+            click.echo(f"\t{cat}")
         sys.exit("Not a good category")
     if category:
         projects = get_ctf_by_category(ctx.obj["json"], category)
@@ -401,8 +392,8 @@ def os(ctx, category, base, output, output_file):
         json=ctx.obj["json"],
     ):
         click.echo("Category available:")
-        for category in get_operating_category(json=ctx.obj["json"]):
-            click.echo(f"\t{category}")
+        for cat in get_operating_category(json=ctx.obj["json"]):
+            click.echo(f"\t{cat}")
         sys.exit("Not a good category")
     if category:
         if category == "project_transferred":
@@ -411,11 +402,14 @@ def os(ctx, category, base, output, output_file):
     else:
         projects = get_all_operating(ctx.obj["json"])
     projects = [
-        {k: os[k] if k in os else "" for k in wanted_keys} for os in projects
+        {k: proj[k] if k in proj else "" for k in wanted_keys}
+        for proj in projects
     ]
     if base:
         projects = [
-            os for os in projects if os["base"].lower() == base.lower()
+            proj
+            for proj in projects
+            if proj["base"].lower() == base.lower()
         ]
     print_output(
         projects=projects,
